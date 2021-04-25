@@ -13,6 +13,7 @@ public class Main {
     private static List<Integer> keyTwo = new ArrayList<>();
     private static List<String[][]> tableList = new ArrayList<>();
 
+
     public static void createTables(String message, int n, int m) {
         int length = message.length();
         int quantity = length / (n * m - (keyTwo.size() / 2));
@@ -60,7 +61,7 @@ public class Main {
                             counter++;
                         }
                     }
-                    support.add(counter);
+                    support.add(n-counter);
                 }
 
                 tableList.set(tableList.size() - 1,  buffer);
@@ -79,6 +80,9 @@ public class Main {
         }
         return;
     }
+
+
+
 
     public static String enc(String message, int n, int m) {
         String output = "";
@@ -130,46 +134,31 @@ public class Main {
         setSupport(message, n, m);
 
         for (int i = 0; i < tableList.size(); i++) {
-            //String[][] table = new String[n][m];
-            for (int j = 0,number=1; number <= m; j++) {
-                if(key.get(j)==number){
-                    String[] columTable = new String[support.get(j+i*m)];
-                    for (int k = 0; k < support.get(j+i*m); k++) {
-                        columTable[k]= String.valueOf(message.charAt(k));
+            for (int j = 0,number=0; number < m; j++) {
+                if (key.get(j) == number) {
+
+
+                    String[] column = new String[support.get(j + i * m)];
+                    for (int k = 0; k < support.get(j + i * m); k++) {
+                        column[k] = String.valueOf(message.charAt(k));
                     }
-                    message = message.substring(support.get(j+i*m));
-                    for (int k = 0, s = 0; s < columTable.length; k++) {
+                    message = message.substring(support.get(j + i * m));
+
+                    for (int k = 0, s = 0; k < n && s < column.length; k++) {
                         if (tableList.get(i)[k][j] == null) {
-                            tableList.get(i)[k][j]=columTable[s];
+                            tableList.get(i)[k][j] = column[s];
                             s++;
-                        }
-                        if (tableList.get(i)[k][j].equals(String.valueOf((char) 142))) {
-                            continue;
-                        }
-                        if (tableList.get(i)[k][j].equals("")) {
-                            break;
                         }
                     }
                     number++;
-
                 }
                 if(j==m-1){
                     j=-1;
                 }
             }
-            //tabletList.add(table);
-        }
-        for (int i = 0; i < tableList.size(); i++) {
-            for (int j = 0; j < n; j++) {
-                for (int k = 0; k < m; k++) {
-                    if (tableList.get(i)[k][j].equals(String.valueOf((char) 142)))
-                        continue;
-                    output += tableList.get(i)[j][k];
-                }
-            }
         }
 
-        return output;
+       return output;
     }
 
     public static void main(String[] args) {
