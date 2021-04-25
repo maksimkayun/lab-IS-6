@@ -14,8 +14,8 @@ public class Main {
 
     public static void createTables(String message, int n, int m) {
         int length = message.length();
-        int quantity = length / (n * m);
-        if (length % (n * m) != 0) {
+        int quantity = length / (n * m - (keyTwo.size() / 2));
+        if (length % (n * m - (keyTwo.size() / 2)) != 0) {
             quantity++;
         }
         quantity++;
@@ -26,6 +26,7 @@ public class Main {
 
     public static void setKeyTwo() {
         char symbol = 142;
+        System.out.println(symbol);
         String ch = String.valueOf(symbol);
 
         for (int i = 0; i < tableList.size(); i++) {
