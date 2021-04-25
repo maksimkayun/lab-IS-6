@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public class Main {
     private static Scanner sc = new Scanner(System.in);
     private static List<Integer> key = new ArrayList<>();
+    private static List<Integer> support = new ArrayList<>();
     private static List<Integer> keyTwo = new ArrayList<>();
     private static List<String[][]> tableList = new ArrayList<>();
 
@@ -20,6 +21,50 @@ public class Main {
         }
         for (int i = 0; i < quantity; i++) {
             tableList.add(new String[n][m]);
+        }
+    }
+
+    public static void setSupport(String message, int n, int m) {
+        int len = message.length();
+        for (int k = 0; k < tableList.size(); k++) {
+            if (k != tableList.size() - 1 && tableList.size() > 1) {
+                int counter = 0;
+                for (int i = 0; i < m; i++) {
+                    for (int j = 1; j < keyTwo.size(); j=j+2) {
+                        if(keyTwo.get(j)==i){
+                            counter=counter+1;
+                        }
+                    }
+                }
+                len -= n * m - (keyTwo.size() / 2);
+                support.add(n - counter);
+            }
+            else {
+                int quantity = n * m - (keyTwo.size() / 2) - len; // количество оставшихся пустых ячеек
+                String[][] buffer = new String[n][m];
+                for (int j = 0; j < keyTwo.size(); j += 2) {
+                    buffer[keyTwo.get(j)][keyTwo.get(j+1)] = String.valueOf((char) 142);
+                }
+                for (int i = n - 1; i > -1 && quantity > 0; i--) {
+                    for (int j = m - 1; j > -1 && quantity > 0; j--) {
+                        if (buffer[i][j] == null) {
+                            buffer[i][j] = "";
+                            quantity--;
+                        }
+                    }
+                }
+                for (int i = 0; i < m; i++) {
+                    int counter = 0;
+                    for (int j = 0; j < n; j++) {
+                        if (buffer[j][i] == null) {
+                            counter++;
+                        }
+                    }
+                    support.add(counter);
+                }
+
+                tableList.set(tableList.size() - 1,  buffer);
+            }
         }
     }
 
@@ -82,6 +127,47 @@ public class Main {
         String output = "";
         createTables(message, n, m);
         setKeyTwo();
+        setSupport(message, n, m);
+
+        for (int i = 0; i < tableList.size(); i++) {
+            //String[][] table = new String[n][m];
+            for (int j = 0,number=1; number <= m; j++) {
+                if(key.get(j)==number){
+                    String[] columTable = new String[support.get(j+i*m)];
+                    for (int k = 0; k < support.get(j+i*m); k++) {
+                        columTable[k]= String.valueOf(message.charAt(k));
+                    }
+                    message = message.substring(support.get(j+i*m));
+                    for (int k = 0, s = 0; s < columTable.length; k++) {
+                        if (tableList.get(i)[k][j] == null) {
+                            tableList.get(i)[k][j]=columTable[s];
+                            s++;
+                        }
+                        if (tableList.get(i)[k][j].equals(String.valueOf((char) 142))) {
+                            continue;
+                        }
+                        if (tableList.get(i)[k][j].equals("")) {
+                            break;
+                        }
+                    }
+                    number++;
+
+                }
+                if(j==m-1){
+                    j=-1;
+                }
+            }
+            //tabletList.add(table);
+        }
+        for (int i = 0; i < tableList.size(); i++) {
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < m; k++) {
+                    if (tableList.get(i)[k][j].equals(String.valueOf((char) 142)))
+                        continue;
+                    output += tableList.get(i)[j][k];
+                }
+            }
+        }
 
         return output;
     }
