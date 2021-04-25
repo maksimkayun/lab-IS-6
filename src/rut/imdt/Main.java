@@ -18,7 +18,6 @@ public class Main {
         if (length % (n * m - (keyTwo.size() / 2)) != 0) {
             quantity++;
         }
-        quantity++;
         for (int i = 0; i < quantity; i++) {
             tableList.add(new String[n][m]);
         }
@@ -26,7 +25,6 @@ public class Main {
 
     public static void setKeyTwo() {
         char symbol = 142;
-        System.out.println(symbol);
         String ch = String.valueOf(symbol);
 
         for (int i = 0; i < tableList.size(); i++) {
@@ -34,19 +32,55 @@ public class Main {
                 tableList.get(i)[keyTwo.get(j)][keyTwo.get(j+1)] = ch;
             }
         }
+        return;
     }
 
     public static String enc(String message, int n, int m) {
         String output = "";
-        createTables(message, m, n);
+        createTables(message, n, m);
         setKeyTwo();
 
+        int counter = 0;
+        for (int i = 0; i < tableList.size() && counter < message.length(); i++) {
+            for (int j = 0; j < n && counter < message.length(); j++) {
+                for (int k = 0; k < m && counter < message.length(); k++) {
+                    if (tableList.get(i)[j][k] == null) {
+                        tableList.get(i)[j][k] = String.valueOf(message.charAt(counter));
+                        counter++;
+                    }
+                    if (tableList.get(i)[j][k].equals(String.valueOf((char) 142))) {
+                        continue;
+                    }
+                }
+            }
+        }
+
+        for (int p = 0; p < tableList.size(); p++) {
+            for (int i = 0; i < m; i++) {
+                int j = findCol(i);
+                for (int k = 0; k < n; k++) {
+                    if (tableList.get(p)[k][j] == null)
+                        break;
+                    if (!tableList.get(p)[k][j].equals(String.valueOf((char) 142))) {
+                        output += tableList.get(p)[k][j];
+                    }
+                }
+            }
+        }
         return output;
+    }
+
+    public static int findCol(int index) { // Функция возвращает № столбца, который нужно записывать в сообщение
+        for (int i = 0; i < key.size(); i++) {
+            if (key.get(i) == index)
+                return i;
+        }
+        return 0;
     }
 
     public static String dec(String message, int n, int m) {
         String output = "";
-        createTables(message, m, n);
+        createTables(message, n, m);
         setKeyTwo();
 
         return output;
