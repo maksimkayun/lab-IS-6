@@ -29,19 +29,20 @@ public class Main {
         int len = message.length();
         for (int k = 0; k < tableList.size(); k++) {
             if (k != tableList.size() - 1 && tableList.size() > 1) {
-                int counter = 0;
                 for (int i = 0; i < m; i++) {
+                    int counter = 0;
                     for (int j = 1; j < keyTwo.size(); j=j+2) {
                         if(keyTwo.get(j)==i){
                             counter=counter+1;
                         }
                     }
+                    len -= n * m - (keyTwo.size() / 2);
+                    support.add(n - counter);
                 }
-                len -= n * m - (keyTwo.size() / 2);
-                support.add(n - counter);
             }
             else {
-                int quantity = n * m - (keyTwo.size() / 2) - len; // количество оставшихся пустых ячеек
+                int quantity = (n * m - (keyTwo.size() / 2)) - (message.length() -
+                        (tableList.size() - 1)*(n * m - (keyTwo.size() / 2))); // количество оставшихся пустых ячеек
                 String[][] buffer = new String[n][m];
                 for (int j = 0; j < keyTwo.size(); j += 2) {
                     buffer[keyTwo.get(j)][keyTwo.get(j+1)] = String.valueOf((char) 142);
@@ -61,7 +62,7 @@ public class Main {
                             counter++;
                         }
                     }
-                    support.add(n-counter);
+                    support.add(counter);
                 }
 
                 tableList.set(tableList.size() - 1,  buffer);
@@ -80,9 +81,6 @@ public class Main {
         }
         return;
     }
-
-
-
 
     public static String enc(String message, int n, int m) {
         String output = "";
@@ -137,7 +135,6 @@ public class Main {
             for (int j = 0,number=0; number < m; j++) {
                 if (key.get(j) == number) {
 
-
                     String[] column = new String[support.get(j + i * m)];
                     for (int k = 0; k < support.get(j + i * m); k++) {
                         column[k] = String.valueOf(message.charAt(k));
@@ -157,7 +154,19 @@ public class Main {
                 }
             }
         }
-
+        for (int i = 0; i < tableList.size(); i++) {
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < m; k++) {
+                    if (tableList.get(i)[j][k].equals("")) {
+                        return output;
+                    }
+                    if (tableList.get(i)[j][k].equals(String.valueOf((char) 142))) {
+                        continue;
+                    }
+                    output += tableList.get(i)[j][k];
+                }
+            }
+        }
        return output;
     }
 
