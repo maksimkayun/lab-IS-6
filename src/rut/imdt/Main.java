@@ -16,9 +16,10 @@ public class Main {
 
     public static void createTables(String message, int n, int m) {
         int length = message.length();
-        int quantity = length / (n * m - (keyTwo.size() / 2));
-        if (length % (n * m - (keyTwo.size() / 2)) != 0) {
-            quantity++;
+        int quantity = length / (n * m - (keyTwo.size() / 2)); // определяем количетсво таблиц, учитывая количетсво
+        // забаненых ячеек
+        if (length % (n * m - (keyTwo.size() / 2)) != 0) { // Если остались ещё символы в сообщении,
+            quantity++;                                    // то это ещё +1 таблица
         }
         for (int i = 0; i < quantity; i++) {
             tableList.add(new String[n][m]);
@@ -26,35 +27,36 @@ public class Main {
     }
 
     public static void setSupport(String message, int n, int m) {
-        int len = message.length();
         for (int k = 0; k < tableList.size(); k++) {
+            // Если это не последняя таблица и она не единственная
             if (k != tableList.size() - 1 && tableList.size() > 1) {
                 for (int i = 0; i < m; i++) {
-                    int counter = 0;
+                    int counter = 0; // количетсво забаненых ячеек в столбце
                     for (int j = 1; j < keyTwo.size(); j=j+2) {
                         if(keyTwo.get(j)==i){
                             counter=counter+1;
                         }
                     }
-                    len -= n * m - (keyTwo.size() / 2);
-                    support.add(n - counter);
+                    support.add(n - counter); // сколько возможно букв в столбце
                 }
             }
-            else {
+            else { // действия для последней (или единственной) таблицы
                 int quantity = (n * m - (keyTwo.size() / 2)) - (message.length() -
                         (tableList.size() - 1)*(n * m - (keyTwo.size() / 2))); // количество оставшихся пустых ячеек
                 String[][] buffer = new String[n][m];
                 for (int j = 0; j < keyTwo.size(); j += 2) {
-                    buffer[keyTwo.get(j)][keyTwo.get(j+1)] = String.valueOf((char) 142);
+                    buffer[keyTwo.get(j)][keyTwo.get(j+1)] = String.valueOf((char) 142); // заполняем 142-м символом
                 }
                 for (int i = n - 1; i > -1 && quantity > 0; i--) {
                     for (int j = m - 1; j > -1 && quantity > 0; j--) {
+                        // Оставшиеся с конца ячейки заполняем пустыми строками ""
                         if (buffer[i][j] == null) {
                             buffer[i][j] = "";
                             quantity--;
                         }
                     }
                 }
+                // Считаем возможное количетсво букв в каждом столбце этой таблицы
                 for (int i = 0; i < m; i++) {
                     int counter = 0;
                     for (int j = 0; j < n; j++) {
@@ -64,19 +66,15 @@ public class Main {
                     }
                     support.add(counter);
                 }
-
-                tableList.set(tableList.size() - 1,  buffer);
+                tableList.set(tableList.size() - 1,  buffer); // подмена
             }
         }
     }
 
     public static void setKeyTwo() {
-        char symbol = 142;
-        String ch = String.valueOf(symbol);
-
         for (int i = 0; i < tableList.size(); i++) {
             for (int j = 0; j < keyTwo.size(); j += 2) {
-                tableList.get(i)[keyTwo.get(j)][keyTwo.get(j+1)] = ch;
+                tableList.get(i)[keyTwo.get(j)][keyTwo.get(j+1)] = String.valueOf((char) 142);
             }
         }
         return;
@@ -167,39 +165,81 @@ public class Main {
                 }
             }
         }
-       return output;
+        return output;
     }
 
     public static void main(String[] args) {
         //============//============//
         //           INPUT          //
-        System.out.print("Введите кол-во столбцов таблиц: ");
-        int m = Integer.parseInt(sc.nextLine());
+        try {
+            System.out.print("Введите кол-во столбцов таблиц: ");
+            int m = Integer.parseInt(sc.nextLine());
+            if (m < 1) {
+                throw new NumberFormatException("Число столбцов m должно быть больше 0!");
+            }
 
-        System.out.print("Введите кол-во строк таблиц: ");
-        int n = Integer.parseInt(sc.nextLine());
+            System.out.print("Введите кол-во строк таблиц: ");
+            int n = Integer.parseInt(sc.nextLine());
+            if (n < 1) {
+                throw new NumberFormatException("Число строк n должно быть больше 0!");
+            }
 
-        System.out.printf("Введите код для шифрования (количество = %d): ", m);
-        String values = sc.nextLine();
-        key = Arrays.stream(values.split(" ")).map(Integer::parseInt).collect(Collectors.toList());
+            System.out.printf("Введите код для шифрования (количество = %d): ", m);
+            String values = sc.nextLine();
+            if (values.split(" ").length != m) {
+                throw new NumberFormatException(String.format("Количетсво элементов ключа должно быть равно " + m));
+            }
+            for (String value:values.split(" ")) {
+                if (Integer.parseInt(value) < 0 || Integer.parseInt(value) > m - 1) {
+                    throw new NumberFormatException(String.format("Значения элементов ключа должны быть от " +
+                            "0 до " + (m - 1) + " включительно"));
+                }
+            }
+            for (int i = 0; i < values.split(" ").length - 1; i++) {
+                for (int j = i + 1; j < values.split(" ").length; j++) {
+                    if (values.split(" ")[i].equals(values.split(" ")[j])) {
+                        throw new NumberFormatException(String.format("Ключ должен пробегать все значения " +
+                                "от 0 до " + (m - 1)));
+                    }
+                }
+            }
+            key = Arrays.stream(values.split(" ")).map(Integer::parseInt).collect(Collectors.toList());
 
-        System.out.printf("Введите координаты пустых ячеек (формат x,y x,y...) строки x < %d, " +
-                "столбцы y < %d, не более %d пар: ", n - 1, m - 1, n * m);
-        String[] inKeyTwo = sc.nextLine().split(" ");
-        for (int i = 0; i < inKeyTwo.length; i++) {
-            keyTwo.add(Integer.parseInt(inKeyTwo[i].split(",")[0]));
-            keyTwo.add(Integer.parseInt(inKeyTwo[i].split(",")[1]));
+            System.out.printf("Введите координаты пустых ячеек (формат x,y x,y...) строки x < %d, " +
+                    "столбцы y < %d, не более %d пар: ", n, m, n * m - 1);
+            String[] inKeyTwo = sc.nextLine().split(" ");
+            if (inKeyTwo.length > n * m - 1 && m != 1 && n != 1) {
+                throw new NumberFormatException(String.format("Количетсво пар должно быть меньше %d", n * m));
+            }
+            for (int i = 0; i < inKeyTwo.length; i++) {
+                keyTwo.add(Integer.parseInt(inKeyTwo[i].split(",")[0]));
+                keyTwo.add(Integer.parseInt(inKeyTwo[i].split(",")[1]));
+                if (Integer.parseInt(inKeyTwo[i].split(",")[0]) >= n) {
+                    throw new NumberFormatException(String.format("Значение строки не должно превышать %d", n - 1));
+                }
+                if (Integer.parseInt(inKeyTwo[i].split(",")[1]) >= m) {
+                    throw new NumberFormatException(String.format("Значение столбца не должно превышать %d", m - 1));
+                }
+            }
+            System.out.print("Введите сообщение для шифрования: ");
+            String message = sc.nextLine();
+            //          END INPUT       //
+            //============//============//
+
+            message = enc(message, n, m);
+            System.out.printf("Зашифрованное сообщение: %s", message);
+            tableList.clear();
+
+            message = dec(message, n, m);
+            System.out.printf("\nРасшифрованное сообщение: %s", message);
         }
-        System.out.print("Введите сообщение для шифрования: ");
-        String message = sc.nextLine();
-        //          END INPUT       //
-        //============//============//
-
-        message = enc(message, n, m);
-        System.out.printf("Зашифрованное сообщение: %s", message);
-        tableList.clear();
-
-        message = dec(message, n, m);
-        System.out.printf("\nРасшифрованное сообщение: %s", message);
+        catch (NumberFormatException e) {
+            System.out.println("Ошибка! " + e.getMessage());
+            System.out.println("Перезапустите программу и попытайтесь снова.");
+        }
+        catch (IndexOutOfBoundsException e) {
+            System.out.println("Ошибка! " + e.getMessage());
+            System.out.println("Перезапустите программу и попытайтесь снова.");
+        }
     }
 }
